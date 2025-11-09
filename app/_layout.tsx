@@ -1,40 +1,49 @@
-// import React from "react";
-// import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-// import { Stack } from "expo-router";
-// import { StatusBar } from "expo-status-bar";
-// import "react-native-reanimated";
+import React from "react";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { Stack} from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import "react-native-reanimated";
 
-// import { useColorScheme } from "@/hooks/use-color-scheme";
-// import { AuthProvider } from "../src/contexts/AuthContext";
-// import { PostsProvider } from "../src/contexts/PostsContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { AuthProvider, useAuth } from "../context/AuthContext";
+import { PostsProvider } from "../context/PostContext";
 
-// export const unstable_settings = {
-//   anchor: "(tabs)",
-// };
+export const unstable_settings = {
+  anchor: "(tabs)",
+};
 
-// export default function RootLayout() {
-//   const colorScheme = useColorScheme();
+function AuthGate() {
+  const { user, loading } = useAuth();
 
-//   return (
-//     <AuthProvider>
-//       <PostsProvider>
-//         <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-//           <Stack>
-//             {/* Auth Screens Group */}
-//             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+  if (loading) return null;
 
-//             {/* Main App Tabs */}
-//             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+  if (!user) {
+    return (
+      <Stack>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      </Stack>
+    );
+  }
 
-//             {/* Optional Modal */}
-//             <Stack.Screen
-//               name="modal"
-//               options={{ presentation: "modal", title: "Modal" }}
-//             />
-//           </Stack>
-//           <StatusBar style="auto" />
-//         </ThemeProvider>
-//       </PostsProvider>
-//     </AuthProvider>
-//   );
-// }
+  return (
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  const colorScheme = useColorScheme();
+
+  return (
+    <AuthProvider>
+      <PostsProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <AuthGate />
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </PostsProvider>
+    </AuthProvider>
+  );
+}

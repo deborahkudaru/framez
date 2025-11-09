@@ -17,8 +17,12 @@ import { auth } from "../firebaseConfig";
 
 type AuthContextType = {
   user: User | null;
-  initializing: boolean;
-  signUp: (data: { name: string; email: string; password: string }) => Promise<void>;
+  loading: boolean;
+  signUp: (data: {
+    name: string;
+    email: string;
+    password: string;
+  }) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -31,12 +35,12 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [initializing, setInitializing] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true); // ✅ fixed
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setInitializing(false);
+      setLoading(false); // ✅ fixed
     });
 
     return unsubscribe;
@@ -68,7 +72,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     <AuthContext.Provider
       value={{
         user,
-        initializing,
+        loading,
         signUp,
         login,
         logout,
