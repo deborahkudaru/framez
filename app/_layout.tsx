@@ -1,13 +1,17 @@
 import React from "react";
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { Stack} from "expo-router";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { PostsProvider } from "../context/PostContext";
-import "../global.css"
+import "../global.css";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -21,7 +25,8 @@ function AuthGate() {
   if (!user) {
     return (
       <Stack>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />
       </Stack>
     );
   }
@@ -40,7 +45,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <PostsProvider>
-        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
           <AuthGate />
           <StatusBar style="auto" />
         </ThemeProvider>
