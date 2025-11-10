@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import {
   View,
   TextInput,
-  Button,
   Image,
-  StyleSheet,
+  TouchableOpacity,
+  Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { usePosts } from "../../context/PostContext";
@@ -27,28 +30,25 @@ export default function CreatePostScreen({ navigation }: Props) {
   const { user } = useAuth();
 
   async function pickImage() {
-    // ✅ Request permissions
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       alert("Permission denied");
       return;
     }
 
-    // ✅ Open gallery
     const result = await ImagePicker.launchImageLibraryAsync({
       quality: 0.6,
       allowsEditing: true,
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
     });
 
-    // ✅ New Expo ImagePicker format
     if (!result.canceled && result.assets && result.assets.length > 0) {
       setImage(result.assets[0].uri);
     }
   }
 
   async function handleSubmit() {
-    if (!user) return;
+    if (!user || !text.trim()) return;
 
     await createPost({
       text,
@@ -61,40 +61,117 @@ export default function CreatePostScreen({ navigation }: Props) {
     navigation.goBack();
   }
 
+  const canPost = text.trim().length > 0;
+
   return (
-    <View style={styles.container}>
-      <TextInput
-        placeholder="What's on your mind?"
-        value={text}
-        onChangeText={setText}
-        style={styles.input}
-      />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-white dark:bg-neutral-900"
+    >
+      <ScrollView className="flex-1">
+        <View className="p-6">
+          {/* HEADER */}
+          <View className="flex-row items-center justify-between mb-6">
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              className="bg-gray-100 dark:bg-gray-900 px-4 py-2 rounded-full"
+            >
+              <Text className="text-sm font-semibold text-gray-900 dark:text-white">
+                Cancel
+              </Text>
+            </TouchableOpacity>
 
-      {image && (
-        <Image
-          source={{ uri: image }}
-          style={styles.image}
-        />
-      )}
+            <Text className="text-xl font-bold text-gray-900 dark:text-white">
+              Create Post
+            </Text>
 
-      <Button title="Pick Image" onPress={pickImage} />
-      <Button title="Post" onPress={handleSubmit} />
-    </View>
+            <TouchableOpacity
+              onPress={handleSubmit}
+              disabled={!canPost}
+              className={`px-4 py-2 rounded-full ${
+                canPost
+                  ? "bg-gray-900 dark:bg-white"
+                  : "bg-gray-200 dark:bg-gray-800"
+              }`}
+            >
+              <Text
+                className={`text-sm font-semibold ${
+                  canPost
+                    ? "text-white dark:text-gray-900"
+                    : "text-gray-400 dark:text-gray-600"
+                }`}
+              >
+                Post
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* USER INFO */}
+          <View className="flex-row items-center mb-6">
+            {user?.photoURL ? (
+              <Image
+                source={{ uri: user.photoURL }}
+                className="w-12 h-12 rounded-full mr-3"
+              />
+            ) : (
+              <View className="w-12 h-12 rounded-full bg-gray-900 dark:bg-white items-center justify-center mr-3">
+                <Text className="text-lg font-bold text-white dark:text-gray-900">
+                  {(user?.displayName || user?.email || "U")[0].toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <Text className="text-base font-semibold text-gray-900 dark:text-white">
+              {user?.displayName || "User"}
+            </Text>
+          </View>
+
+          {/* TEXT INPUT */}
+          <TextInput
+            placeholder="What's on your mind?"
+            placeholderTextColor="#9CA3AF"
+            value={text}
+            onChangeText={setText}
+            multiline
+            className="text-base text-gray-900 dark:text-white mb-6 min-h-[120px]"
+            style={{ textAlignVertical: "top" }}
+          />
+
+          {/* IMAGE PREVIEW */}
+          {image && (
+            <View className="mb-6">
+              <View className="relative">
+                <Image
+                  source={{ uri: image }}
+                  className="w-full h-80 rounded-2xl"
+                  resizeMode="cover"
+                />
+                <TouchableOpacity
+                  onPress={() => setImage(null)}
+                  className="absolute top-3 right-3 bg-gray-900/80 dark:bg-white/80 w-10 h-10 rounded-full items-center justify-center"
+                >
+                  <Text className="text-white dark:text-gray-900 text-xl font-bold">
+                    ×
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* IMAGE PICKER BUTTON */}
+          <TouchableOpacity
+            onPress={pickImage}
+            className="bg-gray-100 dark:bg-gray-900 py-4 rounded-2xl items-center border-2 border-dashed border-gray-300 dark:border-gray-700"
+          >
+            <Text className="text-4xl mb-2">📷</Text>
+            <Text className="text-base font-semibold text-gray-900 dark:text-white">
+              {image ? "Change Image" : "Add Image"}
+            </Text>
+            <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Optional
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 16 },
-  input: {
-    borderWidth: 1,
-    borderRadius: 6,
-    padding: 10,
-    marginBottom: 12,
-  },
-  image: {
-    width: 200,
-    height: 200,
-    borderRadius: 8,
-    marginVertical: 10,
-  },
-});

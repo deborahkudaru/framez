@@ -25,15 +25,22 @@ function AuthGate() {
   if (!user) {
     return (
       <Stack>
-        <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(auth)"
+          options={{ headerShown: false }}
+        />
       </Stack>
     );
   }
 
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="(tabs)"
+        options={{
+          headerShown: false,
+        }}
+      />
       <Stack.Screen name="modal" options={{ presentation: "modal" }} />
     </Stack>
   );

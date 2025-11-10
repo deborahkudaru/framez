@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  Image,
-  StyleSheet,
-} from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { usePosts } from "../../context/PostContext";
 import PostItem from "../../components/post-item";
@@ -19,59 +13,108 @@ export default function ProfileScreen() {
   const myPosts = posts.filter((p) => p.authorId === user.uid);
 
   return (
-    <View style={styles.container}>
-      {/* USER INFO */}
-      <View style={styles.profileHeader}>
-        {user.photoURL ? (
-          <Image
-            source={{ uri: user.photoURL }}
-            style={styles.avatar}
-          />
-        ) : null}
+    <ScrollView className="flex-1 bg-white dark:bg-gray-950">
+      {/* HEADER WITH GRADIENT BACKGROUND */}
+      <View className="bg-gradient-to-b from-gray-100 to-white dark:from-gray-900 dark:to-gray-950 pb-6">
+        {/* PROFILE SECTION */}
+        <View className="items-center pt-12 px-6">
+          {/* AVATAR WITH RING */}
+          <View className="mb-4">
+            {user.photoURL ? (
+              <View className="relative">
+                <View className="absolute inset-0 bg-gray-900 dark:bg-white rounded-full blur-xl opacity-20" />
+                <Image
+                  source={{ uri: user.photoURL }}
+                  className="w-28 h-28 rounded-full border-4 border-white dark:border-gray-800"
+                />
+              </View>
+            ) : (
+              <View className="w-28 h-28 rounded-full bg-gray-900 dark:bg-white items-center justify-center border-4 border-white dark:border-gray-800">
+                <Text className="text-4xl font-bold text-white dark:text-gray-900">
+                  {(user.displayName || user.email || "U")[0].toUpperCase()}
+                </Text>
+              </View>
+            )}
+          </View>
 
-        <Text style={styles.name}>
-          {user.displayName || user.email}
-        </Text>
+          {/* USER INFO */}
+          <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+            {user.displayName || "User"}
+          </Text>
 
-        <Text style={styles.email}>{user.email}</Text>
+          <Text className="text-base text-gray-600 dark:text-gray-400 mb-6">
+            {user.email}
+          </Text>
+
+          {/* STATS SECTION */}
+          <View className="flex-row bg-white dark:bg-gray-900 rounded-2xl px-8 py-4 shadow-sm border border-gray-100 dark:border-gray-800">
+            <View className="items-center px-6 border-r border-gray-200 dark:border-gray-700">
+              <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+                {myPosts.length}
+              </Text>
+              <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Posts
+              </Text>
+            </View>
+
+            <View className="items-center px-6 border-r border-gray-200 dark:border-gray-700">
+              <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+                0
+              </Text>
+              <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Followers
+              </Text>
+            </View>
+
+            <View className="items-center px-6">
+              <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+                0
+              </Text>
+              <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Following
+              </Text>
+            </View>
+          </View>
+        </View>
       </View>
 
-      {/* POSTS */}
-      <Text style={styles.sectionTitle}>My Posts</Text>
+      {/* POSTS SECTION */}
+      <View className="px-6 mt-6">
+        <View className="flex-row items-center justify-between mb-4">
+          <Text className="text-xl font-bold text-gray-900 dark:text-white">
+            My Posts
+          </Text>
+          {myPosts.length > 0 && (
+            <View className="bg-gray-900 dark:bg-white rounded-full px-3 py-1">
+              <Text className="text-sm font-semibold text-white dark:text-gray-900">
+                {myPosts.length}
+              </Text>
+            </View>
+          )}
+        </View>
 
-      <FlatList
-        data={myPosts}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <PostItem post={item} />}
-      />
-    </View>
+        {myPosts.length === 0 ? (
+          <View className="items-center justify-center py-16">
+            <View className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-900 items-center justify-center mb-4">
+              <Text className="text-3xl">📝</Text>
+            </View>
+            <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              No posts yet
+            </Text>
+            <Text className="text-sm text-gray-600 dark:text-gray-400 text-center">
+              Start sharing your thoughts with the community
+            </Text>
+          </View>
+        ) : (
+          <View className="pb-6">
+            {myPosts.map((item) => (
+              <View key={item.id} className="mb-4">
+                <PostItem post={item} />
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  profileHeader: {
-    alignItems: "center",
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 8,
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: "600",
-  },
-  email: {
-    color: "#555",
-    marginTop: 4,
-  },
-  sectionTitle: {
-    marginTop: 16,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-});
