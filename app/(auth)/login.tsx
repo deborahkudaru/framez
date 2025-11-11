@@ -53,15 +53,15 @@ export default function LoginScreen() {
       >
         <View className="flex-1 justify-center px-6 py-8">
           {/* Header */}
-          <View className="items-center mb-12">
-            <View className="w-20 h-20 rounded-full bg-black dark:bg-white items-center justify-center mb-4">
-              <Text className="text-3xl">📱</Text>
+          <View className="items-center mb-10">
+            <View className="w-16 h-16 bg-purple-600 rounded-2xl items-center justify-center mb-4 shadow-lg">
+              <Ionicons name="camera" size={32} color="#ffffff" />
             </View>
-            <Text className="text-4xl font-bold mb-2 text-black dark:text-white">
-              Framez
+            <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Welcome Back
             </Text>
-            <Text className="text-base text-gray-600 dark:text-gray-400">
-              Welcome back! 👋
+            <Text className="text-base text-gray-600 dark:text-gray-400 text-center">
+              Sign in to continue your Framez journey
             </Text>
           </View>
 
@@ -69,17 +69,17 @@ export default function LoginScreen() {
           <View className="mb-6">
             {/* Email Input */}
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Email
+              <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email Address
               </Text>
               <TextInput
                 placeholder="Enter your email"
                 placeholderTextColor={
-                  colorScheme === "dark" ? "#9ca3af" : "#9ca3af"
+                  colorScheme === "dark" ? "#6b7280" : "#9ca3af"
                 }
                 value={email}
                 onChangeText={setEmail}
-                className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white"
+                className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white focus:border-purple-500"
                 autoCapitalize="none"
                 keyboardType="email-address"
                 editable={!loading}
@@ -87,30 +87,31 @@ export default function LoginScreen() {
             </View>
 
             {/* Password Input */}
-            <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <View className="mb-6">
+              <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Password
               </Text>
               <View className="relative">
                 <TextInput
                   placeholder="Enter your password"
                   placeholderTextColor={
-                    colorScheme === "dark" ? "#9ca3af" : "#9ca3af"
+                    colorScheme === "dark" ? "#6b7280" : "#9ca3af"
                   }
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white pr-12"
+                  className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white pr-12 focus:border-purple-500"
                   editable={!loading}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-4"
+                  disabled={loading}
                 >
                   <Ionicons
                     name={showPassword ? "eye-off-outline" : "eye-outline"}
                     size={24}
-                    color={colorScheme === "dark" ? "#9ca3af" : "#6b7280"}
+                    color={colorScheme === "dark" ? "#6b7280" : "#6b7280"}
                   />
                 </TouchableOpacity>
               </View>
@@ -118,10 +119,18 @@ export default function LoginScreen() {
 
             {/* Error Message */}
             {error ? (
-              <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
-                <Text className="text-red-600 dark:text-red-400 text-sm text-center">
-                  {error}
-                </Text>
+              <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-4">
+                <View className="flex-row items-center">
+                  <Ionicons
+                    name="warning"
+                    size={20}
+                    color="#dc2626"
+                    className="mr-2"
+                  />
+                  <Text className="text-red-600 dark:text-red-400 text-sm flex-1">
+                    {error}
+                  </Text>
+                </View>
               </View>
             ) : null}
 
@@ -131,33 +140,55 @@ export default function LoginScreen() {
               disabled={isDisabled}
               className={`${
                 isDisabled
-                  ? "bg-gray-300 dark:bg-gray-700"
-                  : "bg-black dark:bg-white active:opacity-80"
-              } p-4 rounded-xl items-center shadow-sm`}
+                  ? "bg-gray-300 dark:bg-gray-800"
+                  : "bg-purple-600 active:bg-purple-700 shadow-lg"
+              } p-4 rounded-xl items-center justify-center shadow-purple-500/25`}
             >
               <Text
                 className={`${
-                  isDisabled
-                    ? "text-gray-500 dark:text-gray-500"
-                    : "text-white dark:text-black"
-                } text-base font-bold`}
+                  isDisabled ? "text-gray-500 dark:text-gray-400" : "text-white"
+                } text-base font-semibold`}
               >
-                {loading ? "Logging in..." : "Login"}
+                {loading ? "Signing In..." : "Sign In"}
               </Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            onPress={() => router.push("/(auth)/signup")}
-            className="p-4 items-center active:opacity-70"
-          >
+          {/* Sign Up Link */}
+          <View className="flex-row justify-center py-4">
             <Text className="text-gray-600 dark:text-gray-400 text-base">
               Dont have an account?{" "}
-              <Text className="font-bold text-black dark:text-white">
-                Sign up
-              </Text>
             </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push("/(auth)/signup")}
+              disabled={loading}
+            >
+              <Text className="text-purple-600 dark:text-purple-400 font-semibold text-base">
+                Sign Up
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Quick Access Notice */}
+          <View className="mt-8 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+            <View className="flex-row items-start">
+              <Ionicons
+                name="flash"
+                size={20}
+                color={colorScheme === "dark" ? "#8b5cf6" : "#7c3aed"}
+                className="mt-0.5 mr-3"
+              />
+              <View className="flex-1">
+                <Text className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                  Quick Access
+                </Text>
+                <Text className="text-xs text-gray-600 dark:text-gray-400 leading-5">
+                  Securely access your photos and videos across all your
+                  devices. Your memories are always within reach.
+                </Text>
+              </View>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

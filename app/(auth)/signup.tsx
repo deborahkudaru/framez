@@ -39,7 +39,7 @@ export default function SignupScreen() {
       setLoading(true);
       setError("");
       await signUp({ name, email, password });
-      router.push("(tabs)")
+      router.push("/(tabs)/profile");
     } catch (error: any) {
       setError(error.message || "Sign up failed");
     } finally {
@@ -60,15 +60,15 @@ export default function SignupScreen() {
       >
         <View className="flex-1 justify-center px-6 py-8">
           {/* Header */}
-          <View className="items-center mb-12">
-            <View className="w-20 h-20 rounded-full bg-black dark:bg-white items-center justify-center mb-4">
-              <Text className="text-3xl">🚀</Text>
+          <View className="items-center mb-10">
+            <View className="w-16 h-16 bg-purple-600 rounded-2xl items-center justify-center mb-4 shadow-lg">
+              <Ionicons name="camera" size={32} color="#ffffff" />
             </View>
-            <Text className="text-4xl font-bold mb-2 text-black dark:text-white">
-              Framez
+            <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Create Account
             </Text>
-            <Text className="text-base text-gray-600 dark:text-gray-400">
-              Create your account ✨
+            <Text className="text-base text-gray-600 dark:text-gray-400 text-center">
+              Join Framez and start capturing your moments
             </Text>
           </View>
 
@@ -76,30 +76,30 @@ export default function SignupScreen() {
           <View className="mb-6">
             {/* Name Input */}
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Full Name
               </Text>
               <TextInput
                 placeholder="Enter your full name"
-                placeholderTextColor={colorScheme === 'dark' ? '#9ca3af' : '#9ca3af'}
+                placeholderTextColor={colorScheme === 'dark' ? '#6b7280' : '#9ca3af'}
                 value={name}
                 onChangeText={setName}
-                className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white"
+                className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white focus:border-purple-500"
                 editable={!loading}
               />
             </View>
 
             {/* Email Input */}
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Email
+              <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email Address
               </Text>
               <TextInput
                 placeholder="Enter your email"
-                placeholderTextColor={colorScheme === 'dark' ? '#9ca3af' : '#9ca3af'}
+                placeholderTextColor={colorScheme === 'dark' ? '#6b7280' : '#9ca3af'}
                 value={email}
                 onChangeText={setEmail}
-                className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white"
+                className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white focus:border-purple-500"
                 autoCapitalize="none"
                 keyboardType="email-address"
                 editable={!loading}
@@ -107,28 +107,29 @@ export default function SignupScreen() {
             </View>
 
             {/* Password Input */}
-            <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <View className="mb-6">
+              <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Password
               </Text>
               <View className="relative">
                 <TextInput
                   placeholder="Create a password (min 6 characters)"
-                  placeholderTextColor={colorScheme === 'dark' ? '#9ca3af' : '#9ca3af'}
+                  placeholderTextColor={colorScheme === 'dark' ? '#6b7280' : '#9ca3af'}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white pr-12"
+                  className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 rounded-xl text-base text-black dark:text-white pr-12 focus:border-purple-500"
                   editable={!loading}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-4"
+                  disabled={loading}
                 >
                   <Ionicons
                     name={showPassword ? "eye-off-outline" : "eye-outline"}
                     size={24}
-                    color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'}
+                    color={colorScheme === 'dark' ? '#6b7280' : '#6b7280'}
                   />
                 </TouchableOpacity>
               </View>
@@ -136,10 +137,18 @@ export default function SignupScreen() {
 
             {/* Error Message */}
             {error ? (
-              <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
-                <Text className="text-red-600 dark:text-red-400 text-sm text-center">
-                  {error}
-                </Text>
+              <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-4">
+                <View className="flex-row items-center">
+                  <Ionicons 
+                    name="warning" 
+                    size={20} 
+                    color="#dc2626" 
+                    className="mr-2"
+                  />
+                  <Text className="text-red-600 dark:text-red-400 text-sm flex-1">
+                    {error}
+                  </Text>
+                </View>
               </View>
             ) : null}
 
@@ -149,48 +158,54 @@ export default function SignupScreen() {
               disabled={isDisabled}
               className={`${
                 isDisabled
-                  ? 'bg-gray-300 dark:bg-gray-700'
-                  : 'bg-black dark:bg-white active:opacity-80'
-              } p-4 rounded-xl items-center shadow-sm`}
+                  ? 'bg-gray-300 dark:bg-gray-800'
+                  : 'bg-purple-600 active:bg-purple-700 shadow-lg'
+              } p-4 rounded-xl items-center justify-center shadow-purple-500/25`}
             >
               <Text className={`${
                 isDisabled
-                  ? 'text-gray-500 dark:text-gray-500'
-                  : 'text-white dark:text-black'
-              } text-base font-bold`}>
+                  ? 'text-gray-500 dark:text-gray-400'
+                  : 'text-white'
+              } text-base font-semibold`}>
                 {loading ? "Creating Account..." : "Create Account"}
               </Text>
             </TouchableOpacity>
           </View>
 
           {/* Login Link */}
-          <TouchableOpacity
-            onPress={() => router.push("/(auth)/login")}
-            className="p-4 items-center active:opacity-70"
-          >
+          <View className="flex-row justify-center py-4">
             <Text className="text-gray-600 dark:text-gray-400 text-base">
               Already have an account?{" "}
-              <Text className="font-bold text-black dark:text-white">
-                Login
-              </Text>
             </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push("/(auth)/login")}
+              disabled={loading}
+            >
+              <Text className="text-purple-600 dark:text-purple-400 font-semibold text-base">
+                Sign In
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* Info Box */}
-          <View className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-            <View className="flex-row items-center mb-2">
+          {/* Security Notice */}
+          <View className="mt-8 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
+            <View className="flex-row items-start">
               <Ionicons 
                 name="shield-checkmark" 
                 size={20} 
-                color={colorScheme === 'dark' ? '#60a5fa' : '#3b82f6'} 
+                color={colorScheme === 'dark' ? '#8b5cf6' : '#7c3aed'} 
+                className="mt-0.5 mr-3"
               />
-              <Text className="text-sm font-semibold text-blue-700 dark:text-blue-400 ml-2">
-                Your data is secure
-              </Text>
+              <View className="flex-1">
+                <Text className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                  Secure & Private
+                </Text>
+                <Text className="text-xs text-gray-600 dark:text-gray-400 leading-5">
+                  Your information is protected with enterprise-grade security measures. 
+                  We never share your personal data with third parties.
+                </Text>
+              </View>
             </View>
-            <Text className="text-xs text-blue-600 dark:text-blue-300 leading-5">
-              We protect your information with industry-standard encryption and never share your data with third parties.
-            </Text>
           </View>
         </View>
       </ScrollView>
