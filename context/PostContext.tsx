@@ -1,128 +1,103 @@
-"use client";
-
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from "react";
-import { db, serverTimestamp, storage } from "../firebaseConfig";
-import {
-  collection,
-  orderBy,
-  query,
-  onSnapshot,
-  addDoc,
-  DocumentData,
+import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
+import { 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  onSnapshot, 
+  where,
+  DocumentData 
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { v4 as uuidv4 } from "uuid";
-
-// ---------- TYPES ---------- //
+import { db, serverTimestamp } from "../firebaseConfig";
+import { useAuth } from "./AuthContext";
 
 export interface Post {
   id: string;
-  text: string;
-  imageUrl: string | null;
-  authorId: string;
-  authorName: string | null;
-  authorAvatar: string | null;
-  createdAt: any; // Firestore timestamp
+  userId: string;
+  userName: string;
+  userEmail: string;
+  content: string;
+  imageUrl?: string;
+  createdAt: any;
 }
 
-export interface CreatePostInput {
-  text?: string;
-  imageUri?: string | null;
-  author: {
-    uid: string;
-    displayName?: string | null;
-    email?: string | null;
-    photoURL?: string | null;
-  };
-}
-
-interface PostsContextType {
+interface PostContextType {
   posts: Post[];
-  createPost: (data: CreatePostInput) => Promise<void>;
+  userPosts: Post[];
+  createPost: (content: string, imageUrl?: string) => Promise<void>;
+  loading: boolean;
 }
 
-interface ProviderProps {
-  children: ReactNode;
-}
+const PostContext = createContext<PostContextType | null>(null);
 
-// ---------- CONTEXT ---------- //
-
-const PostsContext = createContext<PostsContextType | undefined>(undefined);
-
-// ---------- PROVIDER ---------- //
-
-export function PostsProvider({ children }: ProviderProps) {
+export function PostsProvider({ children }: { children: ReactNode }) {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
+  // Fetch all posts
   useEffect(() => {
     const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const postsData: Post[] = [];
+      querySnapshot.forEach((doc) => {
+        postsData.push({ id: doc.id, ...doc.data() } as Post);
+      });
+      setPosts(postsData);
+      setLoading(false);
+    });
 
-   const unsub = onSnapshot(q, (snapshot) => {
-  const data: Post[] = snapshot.docs.map((d) => {
-    const doc = d.data() as DocumentData;
-
-    return {
-      id: d.id,
-      text: doc.text ?? "",
-      imageUrl: doc.imageUrl ?? null,
-      authorId: doc.authorId ?? "",
-      authorName: doc.authorName ?? null,
-      authorAvatar: doc.authorAvatar ?? null,
-      createdAt: doc.createdAt ?? null, 
-    };
-  });
-
-  setPosts(data);
-});
-
-
-    return unsub;
+    return unsubscribe;
   }, []);
 
-  const createPost = async ({ text, imageUri, author }: CreatePostInput) => {
-    let imageUrl: string | null = null;
-
-    if (imageUri) {
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-      const name = uuidv4();
-      const imageRef = ref(storage, `posts/${name}`);
-
-      await uploadBytes(imageRef, blob);
-      imageUrl = await getDownloadURL(imageRef);
+  // Fetch user's posts
+  useEffect(() => {
+    if (!user) {
+      setUserPosts([]);
+      return;
     }
 
-    const newPost = {
-      text: text || "",
-      imageUrl,
-      authorId: author.uid,
-      authorName: author.displayName || author.email || null,
-      authorAvatar: author.photoURL || null,
-      createdAt: serverTimestamp(),
-    };
+    const q = query(
+      collection(db, "posts"), 
+      where("userId", "==", user.uid),
+      orderBy("createdAt", "desc")
+    );
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const userPostsData: Post[] = [];
+      querySnapshot.forEach((doc) => {
+        userPostsData.push({ id: doc.id, ...doc.data() } as Post);
+      });
+      setUserPosts(userPostsData);
+    });
 
-    await addDoc(collection(db, "posts"), newPost);
+    return unsubscribe;
+  }, [user]);
+
+  const createPost = async (content: string, imageUrl?: string) => {
+    if (!user) throw new Error("User must be logged in to create a post");
+
+    await addDoc(collection(db, "posts"), {
+      userId: user.uid,
+      userName: user.displayName || "Anonymous",
+      userEmail: user.email,
+      content,
+      imageUrl: imageUrl || null,
+      createdAt: serverTimestamp()
+    });
   };
 
   return (
-    <PostsContext.Provider value={{ posts, createPost }}>
+    <PostContext.Provider value={{ posts, userPosts, createPost, loading }}>
       {children}
-    </PostsContext.Provider>
+    </PostContext.Provider>
   );
 }
 
-// ---------- HOOK ---------- //
-
-export const usePosts = (): PostsContextType => {
-  const ctx = useContext(PostsContext);
-  if (!ctx) {
-    throw new Error("usePosts must be used within a PostsProvider");
-  }
-  return ctx;
+export const usePosts = () => {
+  const context = useContext(PostContext);
+  if (!context) throw new Error("usePosts must be used within PostsProvider");
+  return context;
 };

@@ -6,42 +6,52 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import "react-native-reanimated";
-
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { PostsProvider } from "../context/PostContext";
+import { View, ActivityIndicator, Text } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import "../global.css";
+import "react-native-reanimated";
 
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-function AuthGate() {
+function RootApp() {
   const { user, loading } = useAuth();
+  const colorScheme = useColorScheme();
 
-  if (loading) return null;
-
-  if (!user) {
+  if (loading) {
     return (
-      <Stack>
-        <Stack.Screen
-          name="(auth)"
-          options={{ headerShown: false }}
+      <View 
+        style={{ 
+          flex: 1, 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          backgroundColor: colorScheme === 'dark' ? '#000' : '#fff' 
+        }}
+      >
+        <ActivityIndicator 
+          size="large" 
+          color={colorScheme === 'dark' ? '#fff' : '#000'} 
         />
-      </Stack>
+        <Text 
+          style={{ 
+            marginTop: 10, 
+            color: colorScheme === 'dark' ? '#fff' : '#000' 
+          }}
+        >
+          Loading Framez...
+        </Text>
+      </View>
     );
   }
 
   return (
-    <Stack>
-      <Stack.Screen
-        name="(tabs)"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      {!user ? (
+        <Stack.Screen name="(auth)" />
+      ) : (
+        <Stack.Screen name="(tabs)" />
+      )}
     </Stack>
   );
 }
@@ -50,15 +60,17 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <AuthProvider>
-      <PostsProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <AuthGate />
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </PostsProvider>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <PostsProvider>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <RootApp />
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </PostsProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
